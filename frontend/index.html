@@ -85,14 +85,17 @@
             <!-- ML SECTION -->
             <div id="ml" class="section">
                 <div class="info">
-                    <strong>Neural Network Classification:</strong> Train a simple neural network on different patterns. Watch as the model learns to classify data points over multiple epochs.
+                    <strong>Neural Network Classification:</strong> Train neural networks on different classification problems. 
+                    <strong>Linear:</strong> Uses a simple linear classifier (no hidden layers).
+                    <strong>XOR & Circle:</strong> Use multi-layer networks to learn non-linear decision boundaries.
+                    Blue points are Class 0, red points are Class 1. Yellow borders indicate misclassifications.
                 </div>
                 
                 <div class="controls">
                     <select id="mlProblem">
-                        <option value="linear">Linear Separation</option>
-                        <option value="circular">Circular Pattern</option>
+                        <option value="linear">Linear Separable</option>
                         <option value="xor">XOR Pattern</option>
+                        <option value="circle">Concentric Circles</option>
                     </select>
                     
                     <button id="mlBtn" onclick="startMLTraining()">Start Training</button>
@@ -100,8 +103,8 @@
                     
                     <div class="speed-control">
                         <label>Speed:</label>
-                        <input type="range" id="mlSpeed" min="100" max="2000" value="500">
-                        <span id="mlSpeedValue">500ms</span>
+                        <input type="range" id="mlSpeed" min="100" max="1000" value="300" step="50">
+                        <span id="mlSpeedValue">300ms</span>
                     </div>
                 </div>
 
@@ -118,7 +121,7 @@
                         </div>
                         <div class="metric">
                             <span>Loss:</span>
-                            <span class="metric-value" id="loss">0.0000</span>
+                            <span class="metric-value" id="loss">0.00%</span>
                         </div>
                         <div class="metric">
                             <span>Accuracy:</span>

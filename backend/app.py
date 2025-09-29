@@ -78,10 +78,12 @@ def pathfinding():
 def ml_classification():
     data = request.json
     problem_type = data.get('problem_type', 'linear')
-    epochs = data.get('epochs', 50)
     
-    X, y = ML.generate_classification_data(problem_type)
-    steps = ML.simple_neural_network(X, y, epochs)
+    # Generate data
+    X, y = ML.generate_classification_data(problem_type, n_samples=200)
+    
+    # Train the network
+    steps = ML.simple_neural_network(X, y, problem_type)
     
     return jsonify({
         'steps': steps,
