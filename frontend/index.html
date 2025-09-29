@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Algorithm Visualizer</h1>
+            <p>Explore sorting, pathfinding, and machine learning algorithms</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('sorting')">Sorting</button>
+            <button class="tab" onclick="switchTab('pathfinding')">Pathfinding</button>
+            <button class="tab" onclick="switchTab('ml')">ML Classification</button>
+        </div>
+
+        <div class="content">
+            <!-- SORTING SECTION -->
+            <div id="sorting" class="section active">
+                <div class="info">
+                    <strong>Sorting Algorithms:</strong> Watch how different algorithms organize data. Yellow bars are being compared, red bars are being swapped, and green bars are in their final sorted position.
+                </div>
+                
+                <div class="controls">
+                    <select id="sortAlgo">
+                        <option value="bubble">Bubble Sort</option>
+                        <option value="quick">Quick Sort</option>
+                        <option value="merge">Merge Sort</option>
+                    </select>
+                    
+                    <button onclick="generateNewArray()">Generate New Array</button>
+                    <button id="sortBtn" onclick="startSorting()">Start Sorting</button>
+                    <button onclick="resetSorting()">Reset</button>
+                    
+                    <div class="speed-control">
+                        <label>Speed:</label>
+                        <input type="range" id="sortSpeed" min="1" max="10" value="5">
+                        <span id="sortSpeedValue">5ms</span>
+                    </div>
+                </div>
+
+                <div class="visualization">
+                    <div id="barsContainer" class="bars-container"></div>
+                </div>
+            </div>
+
+            <!-- PATHFINDING SECTION -->
+            <div id="pathfinding" class="section">
+                <div class="info">
+                    <strong>Pathfinding Algorithms:</strong> Click to set start (green) and end (red) points. Blue cells show visited nodes, yellow shows the shortest path. Click cells again to toggle walls.
+                </div>
+                
+                <div class="controls">
+                    <select id="pathAlgo">
+                        <option value="dijkstra">Dijkstra's Algorithm</option>
+                        <option value="astar">A* Algorithm</option>
+                    </select>
+                    
+                    <button onclick="generateNewMaze()">Generate New Maze</button>
+                    <button onclick="clearMaze()">Clear Walls</button>
+                    <button id="pathBtn" onclick="startPathfinding()">Find Path</button>
+                    <button onclick="resetPathfinding()">Reset</button>
+                    
+                    <div class="speed-control">
+                        <label>Speed:</label>
+                        <input type="range" id="pathSpeed" min="1" max="10" value="5">
+                        <span id="pathSpeedValue">5ms</span>
+                    </div>
+                </div>
+
+                <div class="visualization">
+                    <div id="mazeContainer" class="maze-container"></div>
+                </div>
+            </div>
+
+            <!-- ML SECTION -->
+            <div id="ml" class="section">
+                <div class="info">
+                    <strong>Neural Network Classification:</strong> Train a simple neural network on different patterns. Watch as the model learns to classify data points over multiple epochs.
+                </div>
+                
+                <div class="controls">
+                    <select id="mlProblem">
+                        <option value="linear">Linear Separation</option>
+                        <option value="circular">Circular Pattern</option>
+                        <option value="xor">XOR Pattern</option>
+                    </select>
+                    
+                    <button id="mlBtn" onclick="startMLTraining()">Start Training</button>
+                    <button onclick="resetML()">Reset</button>
+                    
+                    <div class="speed-control">
+                        <label>Speed:</label>
+                        <input type="range" id="mlSpeed" min="100" max="2000" value="500">
+                        <span id="mlSpeedValue">500ms</span>
+                    </div>
+                </div>
+
+                <div class="visualization">
+                    <div class="ml-container">
+                        <div class="chart-container">
+                            <canvas id="mlCanvas" width="500" height="500"></canvas>
+                        </div>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span>Epoch:</span>
+                            <span class="metric-value" id="epoch">0</span>
+                        </div>
+                        <div class="metric">
+                            <span>Loss:</span>
+                            <span class="metric-value" id="loss">0.0000</span>
+                        </div>
+                        <div class="metric">
+                            <span>Accuracy:</span>
+                            <span class="metric-value" id="accuracy">0.00%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
