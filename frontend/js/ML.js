@@ -1,3 +1,4 @@
+import { playBeep } from './sound.js';
 import { state } from './state.js';
 
 // Load and display data when problem type changes
@@ -63,6 +64,10 @@ export async function animateMLTraining(steps) {
     
     for (let step of steps) {
         if (!state.isAnimating) break;
+
+        // sound feedback based on loss
+        const frequency = 200 + (1 - step.loss) * 800;
+        playBeep(frequency, Math.max(50, speed / 2), 'square');
         
         renderMLVisualization(step);
         updateMetrics(step);
