@@ -22,20 +22,20 @@ def sort_array():
     data = request.json
     array = data.get('array', [])
     algorithm = data.get('algorithm', 'bubble')
-    
-    if not array:
-        array = [random.randint(10, 100) for _ in range(20)]
-    
-    if algorithm == 'bubble':
-        steps = sorting.bubble_sort(array)
-    elif algorithm == 'quick':
-        steps = sorting.quick_sort(array)
-    elif algorithm == 'merge':
-        steps = sorting.merge_sort(array)
-    else:
+
+    algorithms = {
+        'bubble': sorting.bubble_sort,
+        'quick': sorting.quick_sort,
+        'merge': sorting.merge_sort,
+        'insertion': sorting.insertion_sort,
+        'selection': sorting.selection_sort
+    }
+
+    func = algorithms.get(algorithm)
+    if not func:
         return jsonify({'error': 'Unknown algorithm'}), 400
     
-    return jsonify({'steps': steps, 'original': array})
+    return jsonify({'steps': func(array), 'original': array})
 
 @app.route('/api/pathfinding', methods=['POST'])
 def pathfinding():
@@ -54,15 +54,25 @@ def pathfinding():
         start = [0, 0]
     if not end:
         end = [rows - 1, cols - 1]
+
+    algorithms = {
+        'dijkstra': path_finding.dijkstra,
+        'astar': path_finding.a_star,
+        'bfs': path_finding.bfs,
+        'dfs': path_finding.dfs
+    }
     
-    if algorithm == 'dijkstra':
-        steps = path_finding.dijkstra(maze, start, end)
-    elif algorithm == 'astar':
-        steps = path_finding.a_star(maze, start, end)
-    else:
+    func = algorithms.get(algorithm)
+    if not func:
         return jsonify({'error': 'Unknown algorithm'}), 400
     
-    return jsonify({'steps': steps, 'maze': maze})
+    steps = func(maze, tuple(start), tuple(end))
+    return jsonify({
+        'steps': steps,
+        'maze': maze,
+        'start': start,
+        'end': end
+    })
 
 @app.route('/api/ml-classification', methods=['POST'])
 def ml_classification():

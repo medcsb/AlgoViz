@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 # ============ PATHFINDING ALGORITHMS ============
 
@@ -140,4 +141,113 @@ def a_star(maze, start, end):
                     f_score[(nr, nc)] = tentative_g + heuristic([nr, nc], end)
                     open_set.append((f_score[(nr, nc)], nr, nc))
     
+    return steps
+
+def bfs(maze, start, end):
+    steps = []
+    rows, cols = len(maze), len(maze[0])
+    
+    maze[start[0]][start[1]] = 0
+    maze[end[0]][end[1]] = 0
+    
+    visited = set()
+    parent = {}
+    queue = deque([start])
+    
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    
+    while queue:
+        r, c = queue.popleft()
+        
+        if (r, c) in visited:
+            continue
+        
+        visited.add((r, c))
+        steps.append({
+            'visited': list(visited),
+            'current': [r, c],
+            'path': []
+        })
+        
+        if (r, c) == end:
+            # Reconstruct path
+            path = []
+            curr = (r, c)
+            while curr in parent:
+                path.append(list(curr))
+                curr = parent[curr]
+            path.append(list(start))
+            path.reverse()
+            
+            steps.append({
+                'visited': list(visited),
+                'current': [r, c],
+                'path': path,
+                'complete': True
+            })
+            break
+        
+        for dr, dc in directions:
+            nr, nc = r + dr, c + dc
+            if (0 <= nr < rows and 0 <= nc < cols and
+                maze[nr][nc] == 0 and (nr, nc) not in visited):
+                if (nr, nc) not in queue:
+                    parent[(nr, nc)] = (r, c)
+                    queue.append((nr, nc))
+    
+    return steps
+
+
+# ============ DFS ============
+def dfs(maze, start, end):
+    steps = []
+    rows, cols = len(maze), len(maze[0])
+
+    maze[start[0]][start[1]] = 0
+    maze[end[0]][end[1]] = 0
+
+    visited = set()
+    parent = {}
+    stack = [start]
+    pushed = set([tuple(start)])  # track what’s already on stack
+
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+    while stack:
+        r, c = stack.pop()
+
+        visited.add((r, c))
+        steps.append({
+            'visited': list(visited),
+            'current': [r, c],
+            'path': []
+        })
+
+        if (r, c) == end:
+            # Reconstruct path
+            path = []
+            curr = (r, c)
+            while curr in parent:
+                path.append(list(curr))
+                curr = parent[curr]
+            path.append(list(start))
+            path.reverse()
+
+            steps.append({
+                'visited': list(visited),
+                'current': [r, c],
+                'path': path,
+                'complete': True
+            })
+            break
+
+        # Push neighbors in **reverse order** for DFS
+        for dr, dc in directions[::-1]:
+            nr, nc = r + dr, c + dc
+            if (0 <= nr < rows and 0 <= nc < cols and
+                maze[nr][nc] == 0 and (nr, nc) not in visited and (nr, nc) not in pushed):
+                parent[(nr, nc)] = (r, c)
+                stack.append((nr, nc))
+                pushed.add((nr, nc))
+
     return steps

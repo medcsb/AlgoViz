@@ -179,3 +179,85 @@ def merge_sort(arr):
     })
     
     return steps
+
+# ============ INSERTION SORT ============
+def insertion_sort(arr):
+    steps = []
+    arr_copy = arr.copy()
+    n = len(arr_copy)
+
+    for i in range(1, n):
+        key = arr_copy[i]
+        j = i - 1
+
+        # Comparing phase
+        steps.append({
+            'array': arr_copy.copy(),
+            'comparing': [j, i],
+            'sorted': list(range(i))
+        })
+
+        while j >= 0 and arr_copy[j] > key:
+            arr_copy[j + 1] = arr_copy[j]
+            steps.append({
+                'array': arr_copy.copy(),
+                'swapping': [j, j + 1],
+                'sorted': list(range(i))
+            })
+            j -= 1
+
+        arr_copy[j + 1] = key
+        steps.append({
+            'array': arr_copy.copy(),
+            'inserting': j + 1,
+            'sorted': list(range(i + 1))
+        })
+
+    steps.append({
+        'array': arr_copy.copy(),
+        'sorted': list(range(n)),
+        'complete': True
+    })
+    return steps
+
+
+# ============ SELECTION SORT ============
+def selection_sort(arr):
+    steps = []
+    arr_copy = arr.copy()
+    n = len(arr_copy)
+
+    for i in range(n):
+        min_idx = i
+
+        # Highlight the current unsorted region
+        for j in range(i + 1, n):
+            steps.append({
+                'array': arr_copy.copy(),
+                'comparing': [min_idx, j],
+                'sorted': list(range(i))
+            })
+
+            if arr_copy[j] < arr_copy[min_idx]:
+                min_idx = j
+
+        # Swap the found minimum into position
+        if min_idx != i:
+            arr_copy[i], arr_copy[min_idx] = arr_copy[min_idx], arr_copy[i]
+            steps.append({
+                'array': arr_copy.copy(),
+                'swapping': [i, min_idx],
+                'sorted': list(range(i + 1))
+            })
+        else:
+            steps.append({
+                'array': arr_copy.copy(),
+                'sorted': list(range(i + 1))
+            })
+
+    steps.append({
+        'array': arr_copy.copy(),
+        'sorted': list(range(n)),
+        'complete': True
+    })
+    return steps
