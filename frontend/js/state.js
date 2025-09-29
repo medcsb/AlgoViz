@@ -6,5 +6,5 @@ export const state = {
     mlData: null,
     mlProblemType: null,
     isAnimating: false,
-    API_URL: 'http://localhost:1222/api'
+    API_URL: 'http://localhost:8080/api'
 };

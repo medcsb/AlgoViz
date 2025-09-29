@@ -74,24 +74,35 @@ def pathfinding():
         'end': end
     })
 
-@app.route('/api/ml-classification', methods=['POST'])
-def ml_classification():
+@app.route('/api/ml-data', methods=['POST'])
+def ml_data():
     data = request.json
     problem_type = data.get('problem_type', 'linear')
     
     # Generate data
     X, y = ML.generate_classification_data(problem_type, n_samples=200)
     
-    # Train the network
-    steps = ML.simple_neural_network(X, y, problem_type)
-    
     return jsonify({
-        'steps': steps,
         'data': {
             'X': X,
             'y': y
         }
     })
 
+# Endpoint to train the network
+@app.route('/api/ml-train', methods=['POST'])
+def ml_train():
+    data = request.json
+    X = data.get('X')
+    y = data.get('y')
+    problem_type = data.get('problem_type', 'linear')
+    
+    # Train the network
+    steps = ML.train_neural_network(X, y, problem_type, max_epochs=1000, snapshot_interval=1)
+    
+    return jsonify({
+        'steps': steps
+    })
+
 if __name__ == '__main__':
-    app.run(debug=True, port=1222)
+    app.run(debug=True, port=8080)

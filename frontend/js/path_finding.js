@@ -134,8 +134,8 @@ async function animatePathfinding(steps) {
 
         // Play sound for visiting cells
         if (step.current) {
-            const frequency = 300 + (step.visited.length % 100) * 5;
-            playBeep(frequency, Math.max(20, speed / 2), 'square');
+            const frequency = 300 + (step.visited.length) * 5;
+            playBeep(frequency, Math.max(100, speed / 2), 'square');
         }
         await new Promise(resolve => setTimeout(resolve, speed));
     }

@@ -78,7 +78,7 @@ export async function animateSorting(steps) {
         if (step.comparing && step.comparing.length > 0) {
             const val = step.array[step.comparing[0]];
             const frequency = 200 + (val / 100) * 400; // Narrower, more pleasant range
-            playBeep(frequency, Math.max(30, speed / 3), 'sine'); // Shorter duration, sine wave
+            playBeep(frequency, Math.max(100, speed / 3), 'square'); // Shorter duration, sine wave
         }
         
         await new Promise(resolve => setTimeout(resolve, speed));

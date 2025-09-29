@@ -48,4 +48,5 @@ document.getElementById('mlSpeed').addEventListener('input', (e) => {
 window.onload = () => {
     generateNewArray();
     generateNewMaze();
+    loadMLData(); // Load initial ML data
 };

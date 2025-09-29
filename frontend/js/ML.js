@@ -1,20 +1,11 @@
 import { state } from './state.js';
 
-// Make sure state has mlProblemType property
-if (!state.hasOwnProperty('mlProblemType')) {
-    state.mlProblemType = null;
-}
-
-export async function startMLTraining() {
-    if (state.isAnimating) return;
-    
+// Load and display data when problem type changes
+export async function loadMLData() {
     const problem = document.getElementById('mlProblem').value;
-    const btn = document.getElementById('mlBtn');
-    btn.disabled = true;
-    state.isAnimating = true;
     
     try {
-        const response = await fetch(`${state.API_URL}/ml-classification`, {
+        const response = await fetch(`${state.API_URL}/ml-data`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -25,6 +16,38 @@ export async function startMLTraining() {
         const data = await response.json();
         state.mlData = data.data;
         state.mlProblemType = problem;
+        
+        // Display the data points immediately (no decision boundary yet)
+        renderMLVisualization(null);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error connecting to backend. Make sure the Python server is running on ' + state.API_URL.split('/api')[0] + '.');
+    }
+}
+
+export async function startMLTraining() {
+    if (state.isAnimating || !state.mlData) {
+        alert('Please select a problem type first!');
+        return;
+    }
+    
+    const problem = document.getElementById('mlProblem').value;
+    const btn = document.getElementById('mlBtn');
+    btn.disabled = true;
+    state.isAnimating = true;
+    
+    try {
+        const response = await fetch(`${state.API_URL}/ml-train`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                X: state.mlData.X,
+                y: state.mlData.y,
+                problem_type: problem
+            })
+        });
+        
+        const data = await response.json();
         await animateMLTraining(data.steps);
     } catch (error) {
         console.error('Error:', error);
@@ -58,7 +81,7 @@ export function renderMLVisualization(step) {
     
     const X = state.mlData.X;
     const y = state.mlData.y;
-    const predictions = step.predictions;
+    const predictions = step ? step.predictions : null;
     
     // Find data bounds with padding
     const xValues = X.map(p => p[0]);
@@ -80,8 +103,10 @@ export function renderMLVisualization(step) {
         return canvas.height - padding - ((y - minY) / (maxY - minY)) * height;
     }
     
-    // Draw decision boundary
-    drawDecisionBoundary(ctx, step.weights, minX, maxX, minY, maxY, scaleX, scaleY);
+    // Draw decision boundary ONLY if we have weights (during/after training)
+    if (step && step.weights) {
+        drawDecisionBoundary(ctx, step.weights, minX, maxX, minY, maxY, scaleX, scaleY, width, height);
+    }
     
     // Draw axes
     ctx.strokeStyle = '#ddd';
@@ -128,16 +153,18 @@ export function renderMLVisualization(step) {
     ctx.fillStyle = '#000';
     ctx.fillText('Class 1', padding + 120, 22);
     
-    ctx.fillStyle = '#fbbf24';
-    ctx.fillRect(padding + 200, 10, 15, 15);
-    ctx.fillStyle = '#000';
-    ctx.fillText('Misclassified', padding + 220, 22);
+    if (predictions) {
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(padding + 200, 10, 15, 15);
+        ctx.fillStyle = '#000';
+        ctx.fillText('Misclassified', padding + 220, 22);
+    }
 }
 
-function drawDecisionBoundary(ctx, weights, minX, maxX, minY, maxY, scaleX, scaleY) {
+function drawDecisionBoundary(ctx, weights, minX, maxX, minY, maxY, scaleX, scaleY, width, height) {
     if (!weights) return;
     
-    const resolution = 100;
+    const resolution = 200; // Higher resolution for smoother boundary
     const stepX = (maxX - minX) / resolution;
     const stepY = (maxY - minY) / resolution;
     
@@ -149,17 +176,19 @@ function drawDecisionBoundary(ctx, weights, minX, maxX, minY, maxY, scaleX, scal
             
             const prediction = evaluateNetwork(x, y, weights, state.mlProblemType);
             
-            // Color based on prediction confidence
-            const alpha = Math.abs(prediction - 0.5) * 0.3; // Max 0.15 opacity
+            // Color each pixel based on what the network predicts
+            // prediction > 0.5 = class 1 (red), prediction < 0.5 = class 0 (blue)
             if (prediction > 0.5) {
-                ctx.fillStyle = `rgba(239, 68, 68, ${alpha})`; // Red for class 1
+                const confidence = (prediction - 0.5) * 2; // 0 to 1
+                ctx.fillStyle = `rgba(239, 68, 68, ${0.2 + confidence * 0.3})`; // Red with varying opacity
             } else {
-                ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`; // Blue for class 0
+                const confidence = (0.5 - prediction) * 2; // 0 to 1
+                ctx.fillStyle = `rgba(59, 130, 246, ${0.2 + confidence * 0.3})`; // Blue with varying opacity
             }
             
-            ctx.fillRect(scaleX(x), scaleY(y), 
-                        Math.ceil(stepX * (maxX - minX) / resolution * 10), 
-                        Math.ceil(stepY * (maxY - minY) / resolution * 10));
+            const pixelWidth = Math.ceil(width / resolution);
+            const pixelHeight = Math.ceil(height / resolution);
+            ctx.fillRect(scaleX(x), scaleY(y), pixelWidth, pixelHeight);
         }
     }
 }
@@ -196,7 +225,7 @@ function evaluateNetwork(x, y, weights, problemType) {
 }
 
 function sigmoid(x) {
-    return 1 / (1 + Math.exp(-x));
+    return 1 / (1 + Math.exp(-Math.max(-500, Math.min(500, x))));
 }
 
 export function updateMetrics(step) {
@@ -207,8 +236,6 @@ export function updateMetrics(step) {
 
 export function resetML() {
     state.isAnimating = false;
-    state.mlData = null;
-    state.mlProblemType = null;
     
     const canvas = document.getElementById('mlCanvas');
     const ctx = canvas.getContext('2d');
@@ -217,4 +244,9 @@ export function resetML() {
     document.getElementById('epoch').textContent = '0';
     document.getElementById('loss').textContent = '0.00%';
     document.getElementById('accuracy').textContent = '0.00%';
+    
+    // Reload the current data to show points again
+    if (state.mlData) {
+        renderMLVisualization(null);
+    }
 }

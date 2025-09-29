@@ -74,9 +74,9 @@ class MLPClassifier(nn.Module):
         return torch.sigmoid(self.fc2(x))
 
 
-def train_neural_network(X, y, problem_type, max_epochs=10000, batch_size=10):
+def train_neural_network(X, y, problem_type, max_epochs=10000, snapshot_interval=10):
     """
-    Train neural network and return snapshots every 10 epochs
+    Train neural network and return snapshots every N epochs
     """
     X_tensor = torch.FloatTensor(X)
     y_tensor = torch.FloatTensor(y).reshape(-1, 1)
@@ -104,8 +104,8 @@ def train_neural_network(X, y, problem_type, max_epochs=10000, batch_size=10):
         loss.backward()
         optimizer.step()
         
-        # Record every 10 epochs
-        if epoch % batch_size == 0 or epoch == max_epochs - 1:
+        # Record every N epochs
+        if epoch % snapshot_interval == 0 or epoch == max_epochs - 1:
             with torch.no_grad():
                 predictions = (outputs > 0.5).float().squeeze().numpy().tolist()
                 accuracy = (outputs.round() == y_tensor).float().mean().item()
@@ -123,13 +123,8 @@ def train_neural_network(X, y, problem_type, max_epochs=10000, batch_size=10):
                     'weights': weights
                 })
                 
-                # Stop if we reach 99% accuracy
-                if accuracy >= 0.99:
+                # Stop if we reach perfect accuracy
+                if accuracy == 1.0:
                     break
     
     return steps
-
-
-def simple_neural_network(X, y, problem_type):
-    """Main entry point for training"""
-    return train_neural_network(X, y, problem_type)
